@@ -1,0 +1,9 @@
+export const REDIS_STREAM_KEY = 'stream' as const;
+export const REDIS_CONSUMER_GROUP_NAME = 'realtm' as const;
+export const REDIS_CONSUMER_NAME = 'realtm' as const;
+export const REDIS_STREAM_START_ID = '0-0' as const;
+export const REDIS_STREAM_NEW_MESSAGES_ID = '>' as const;
+export const REDIS_ERROR_BUSYGROUP = 'BUSYGROUP' as const;
+export const REDIS_OPTION_MKSTREAM = 'MKSTREAM' as const;
+export const REDIS_OPTION_COUNT = 'COUNT' as const;
+export const REDIS_OPTION_BLOCK = 'BLOCK' as const;

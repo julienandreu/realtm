@@ -46,7 +46,7 @@ This project adheres to a code of conduct. By participating, you are expected to
    ```bash
    # Using Docker (recommended)
    npm run redis:start
-   
+
    # Or use your own Redis instance
    # Make sure Redis is running and accessible
    ```
@@ -68,7 +68,7 @@ This project adheres to a code of conduct. By participating, you are expected to
    ```bash
    # Start server
    npm run dev server
-   
+
    # Start client (in another terminal)
    npm run dev client tag1 tag2
    ```
@@ -273,16 +273,6 @@ If your changes affect usage, update the README:
 - Document new environment variables
 - Update configuration section
 
-## Release Process
-
-Releases are automated using semantic-release:
-
-1. Merge to `main` branch
-2. Semantic-release analyzes commits
-3. Automatically creates version and release notes
-4. Publishes to npm
-5. Creates GitHub release
-
 ## Getting Help
 
 - 📚 Check existing [documentation](README.md)
@@ -294,7 +284,6 @@ Releases are automated using semantic-release:
 
 Contributors are recognized in our:
 
-- Release notes
 - Contributors section
 - Acknowledgments
 

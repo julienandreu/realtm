@@ -1,6 +1,5 @@
 # realtm
 
-[![npm version](https://img.shields.io/npm/v/realtm.svg)](https://www.npmjs.com/package/realtm)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![CI](https://github.com/julienandreu/realtm/workflows/CI/badge.svg)](https://github.com/julienandreu/realtm/actions)
@@ -53,14 +52,14 @@ npm run dev client tag1 tag2
 ### Programmatic Usage
 
 ```typescript
-import { startServer } from 'realtm';
-import { startClient } from 'realtm';
+import {startServer} from 'realtm';
+import {startClient} from 'realtm';
 
 // Start server
 startServer();
 
 // Start client with tags
-const socket = startClient({ tags: ['worker', 'backend'] });
+const socket = startClient({tags: ['worker', 'backend']});
 ```
 
 ## 📚 Documentation
@@ -124,20 +123,20 @@ npm run test:ui
 
 ### Available Scripts
 
-| Script                  | Description                                     |
-| ----------------------- | ----------------------------------------------- |
-| `npm run build`         | Build the project                               |
+| Script                  | Description                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| `npm run build`         | Build the project                                                 |
 | `npm run dev`           | Run development server/client (use `server` or `client` argument) |
-| `npm test`              | Run tests                                       |
-| `npm run test:watch`    | Run tests in watch mode                         |
-| `npm run test:coverage` | Run tests with coverage                         |
-| `npm run test:ui`       | Run tests with UI                               |
-| `npm run lint`          | Lint and fix code                               |
-| `npm run format`        | Format code with Prettier                       |
-| `npm run type-check`    | Type check without emitting                     |
-| `npm run validate`      | Run all checks (lint, format, type-check, test) |
-| `npm run clean`         | Clean build artifacts                           |
-| `npm run redis:start`   | Start Redis server using Docker                 |
+| `npm test`              | Run tests                                                         |
+| `npm run test:watch`    | Run tests in watch mode                                           |
+| `npm run test:coverage` | Run tests with coverage                                           |
+| `npm run test:ui`       | Run tests with UI                                                 |
+| `npm run lint`          | Lint and fix code                                                 |
+| `npm run format`        | Format code with Prettier                                         |
+| `npm run type-check`    | Type check without emitting                                       |
+| `npm run validate`      | Run all checks (lint, format, type-check, test)                   |
+| `npm run clean`         | Clean build artifacts                                             |
+| `npm run redis:start`   | Start Redis server using Docker                                   |
 
 ## 📋 Requirements
 

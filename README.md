@@ -1,6 +1,6 @@
 # realtm
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![CI](https://github.com/julienandreu/realtm/workflows/CI/badge.svg)](https://github.com/julienandreu/realtm/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/julienandreu/realtm)](https://codecov.io/gh/julienandreu/realtm)

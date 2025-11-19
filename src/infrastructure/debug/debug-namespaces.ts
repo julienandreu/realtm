@@ -9,4 +9,3 @@ export const debugStream = debug('realtm:stream');
 export const debugConfig = debug('realtm:config');
 export const debugIoc = debug('realtm:ioc');
 export const debugMiddleware = debug('realtm:middleware');
-

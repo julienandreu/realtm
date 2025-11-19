@@ -1,0 +1,75 @@
+{
+  "author": "Julien Andreu <julienandreu@me.com>",
+  "bugs": {
+    "url": "https://github.com/julienandreu/realtm/issues"
+  },
+  "dependencies": {
+    "debug": "^4.3.7",
+    "redis": "^5.9.0",
+    "reflect-metadata": "^0.2.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "tsyringe": "^4.10.0",
+    "zod": "^4.1.12"
+  },
+  "description": "Realt-time communication",
+  "keywords": [
+    "realt-time",
+    "communication",
+    "websocket",
+    "socket.io",
+    "socket",
+    "real-time",
+    "communication",
+    "websocket",
+    "socket.io",
+    "socket"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@eslint/js": "^9.39.1",
+    "@types/debug": "^4.1.12",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@vitest/coverage-v8": "^4.0.8",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2",
+    "lint-staged": "^16.2.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^4.0.8"
+  },
+  "homepage": "https://github.com/julienandreu/realtm",
+  "license": "MIT",
+  "name": "realtm",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/julienandreu/realtm.git"
+  },
+  "engines": {
+    "node": ">=24.11.1"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc --project tsconfig.json",
+    "dev": "tsx src/presentation/main.ts",
+    "lint": "eslint src --fix",
+    "lint:check": "eslint src",
+    "format": "prettier src --write --log-level error",
+    "format:check": "prettier src --check",
+    "redis:start": "docker run -p 6379:6379 --name realtm-redis -d redis",
+    "type-check": "tsc -p ./tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "prepare": "husky",
+    "clean": "rm -rf dist coverage node_modules/.cache",
+    "validate": "npm run type-check && npm run lint:check && npm run format:check && npm run test"
+  },
+  "version": "0.1.0"
+}

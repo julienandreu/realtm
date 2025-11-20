@@ -1,6 +1,28 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run lint-staged to check staged files
-npx lint-staged
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged to auto-fix staged files
+echo "🔧 Running lint-staged on staged files..."
+npx lint-staged || {
+  echo "❌ lint-staged failed. Please fix the errors above."
+  exit 1
+}
+
+# Run type check
+echo "📝 Type checking..."
+npm run type-check || {
+  echo "❌ Type check failed. Please fix type errors before committing."
+  exit 1
+}
+
+# Run lint check on all files
+echo "🔎 Linting..."
+npm run lint:check || {
+  echo "❌ Lint check failed. Please fix linting errors before committing."
+  exit 1
+}
+
+echo "✅ All pre-commit checks passed!"
 

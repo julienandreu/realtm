@@ -1,16 +1,21 @@
-import {injectable} from 'tsyringe';
-import {readFileSync} from 'fs';
-import {createSecureServer} from 'http2';
-import {type ExtendedError, Server, type Socket} from 'socket.io';
-import type {ServerConfig} from '../../domain/types/config.types';
-import {debugSocket} from '../debug/debug-namespaces';
+import { readFileSync } from 'fs';
+import { createSecureServer } from 'http2';
+import { type ExtendedError, Server, type Socket } from 'socket.io';
+import { inject, injectable } from 'tsyringe';
+import { Config, type ServerConfig } from '../../domain/types/config.types';
+import { Logger } from '../../domain/interfaces/utils/Logger';
 
 @injectable()
 export class SocketRepository {
   private readonly server: Server;
 
-  constructor(config: ServerConfig) {
-    debugSocket('Creating Socket.IO server with cert: %s, key: %s', config.certPath, config.keyPath);
+  constructor(
+    @inject(Config)
+    config: ServerConfig,
+    @inject(Logger)
+    private readonly logger: Logger,
+  ) {
+    this.logger.debug('Creating Socket.IO server', { certPath: config.certPath, keyPath: config.keyPath });
     const httpServer = createSecureServer({
       allowHTTP1: true,
       key: readFileSync(config.keyPath),
@@ -18,7 +23,7 @@ export class SocketRepository {
     });
 
     this.server = new Server(httpServer, {});
-    debugSocket('Socket.IO server created');
+    this.logger.debug('Socket.IO server created');
   }
 
   getServer(): Server {
@@ -26,23 +31,23 @@ export class SocketRepository {
   }
 
   use(middleware: (socket: Socket, next: (err?: ExtendedError) => void) => void): void {
-    debugSocket('Registering middleware');
+    this.logger.debug('Registering middleware');
     this.server.use(middleware);
   }
 
   onConnection(handler: (socket: Socket) => Promise<void> | void): void {
-    debugSocket('Registering connection handler');
+    this.logger.debug('Registering connection handler');
     this.server.on('connection', handler);
   }
 
   onDisconnect(handler: () => void): void {
-    debugSocket('Registering disconnect handler');
+    this.logger.debug('Registering disconnect handler');
     this.server.on('disconnect', handler);
   }
 
   startListening(port: number): void {
-    debugSocket('Starting to listen on port: %d', port);
+    this.logger.debug('Starting to listen on port', { port });
     this.server.listen(port);
-    debugSocket('Server listening on port: %d', port);
+    this.logger.debug('Server listening on port', { port });
   }
 }

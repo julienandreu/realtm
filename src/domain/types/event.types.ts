@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 const TagsSchema = z.preprocess((value: unknown): unknown => {
   if (typeof value === 'string') {

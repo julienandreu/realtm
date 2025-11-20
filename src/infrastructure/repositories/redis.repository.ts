@@ -1,6 +1,5 @@
-import {injectable} from 'tsyringe';
-import {createClient, type RedisClientType} from 'redis';
-import {debugRedis} from '../debug/debug-namespaces';
+import { createClient, type RedisClientType } from 'redis';
+import { inject, injectable } from 'tsyringe';
 import {
   REDIS_ERROR_BUSYGROUP,
   REDIS_OPTION_BLOCK,
@@ -20,23 +19,29 @@ import type {
   RedisStreamClaimOptions,
   RedisStreamReadOptions,
 } from '../../domain/types/redis-stream-options.types';
+import { Logger } from '../../domain/interfaces/utils/Logger';
 
 @injectable()
 export class RedisRepository {
   private readonly client: RedisClientType;
 
-  constructor(redisUrl: string) {
-    debugRedis('Creating Redis client with URL: %s', redisUrl);
-    this.client = createClient({url: redisUrl});
+  constructor(
+    @inject('RedisUrl')
+    redisUrl: string,
+    @inject(Logger)
+    private readonly logger: Logger,
+  ) {
+    this.logger.debug('Creating Redis client', { redisUrl });
+    this.client = createClient({ url: redisUrl });
   }
 
   async connect(): Promise<void> {
     if (!this.client.isOpen) {
-      debugRedis('Connecting to Redis');
+      this.logger.debug('Connecting to Redis');
       await this.client.connect();
-      debugRedis('Connected to Redis successfully');
+      this.logger.debug('Connected to Redis successfully');
     } else {
-      debugRedis('Redis client already connected');
+      this.logger.debug('Redis client already connected');
     }
   }
 
@@ -45,122 +50,117 @@ export class RedisRepository {
   }
 
   async ensureConsumerGroupExists(options: RedisStreamBaseOptions): Promise<void> {
-    debugRedis('Ensuring consumer group exists: streamKey=%s, groupName=%s', options.streamKey, options.groupName);
+    this.logger.debug('Ensuring consumer group exists', { streamKey: options.streamKey, groupName: options.groupName });
     try {
       await this.client.xGroupCreate(options.streamKey, options.groupName, REDIS_STREAM_START_ID, {
         [REDIS_OPTION_MKSTREAM]: true,
       });
-      debugRedis('Consumer group created successfully: groupName=%s', options.groupName);
+      this.logger.debug('Consumer group created successfully', { groupName: options.groupName });
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes(REDIS_ERROR_BUSYGROUP)) {
-        debugRedis('Consumer group already exists, setting ID: groupName=%s', options.groupName);
+        this.logger.debug('Consumer group already exists, setting ID', { groupName: options.groupName });
         try {
           await this.client.xGroupSetId(options.streamKey, options.groupName, REDIS_STREAM_START_ID);
-          debugRedis('Consumer group ID set successfully: groupName=%s', options.groupName);
+          this.logger.debug('Consumer group ID set successfully', { groupName: options.groupName });
         } catch {
-          debugRedis('Failed to set consumer group ID (may not be supported)');
+          this.logger.debug('Failed to set consumer group ID (may not be supported)');
         }
         return;
       }
-      debugRedis('Error ensuring consumer group: %O', error);
+      this.logger.error('Error ensuring consumer group', { error });
       throw error;
     }
   }
 
   async claimMessages(options: RedisStreamClaimOptions): Promise<readonly RedisMessage[]> {
-    debugRedis(
-      'Claiming messages: streamKey=%s, groupName=%s, consumerName=%s',
-      options.streamKey,
-      options.groupName,
-      options.consumerName,
-    );
+    this.logger.debug('Claiming messages', {
+      streamKey: options.streamKey,
+      groupName: options.groupName,
+      consumerName: options.consumerName,
+    });
     const claimed = await this.client.xAutoClaim(
       options.streamKey,
       options.groupName,
       options.consumerName,
       options.reclaimMinIdleMs ?? 1000,
       REDIS_STREAM_START_ID,
-      {[REDIS_OPTION_COUNT]: 1},
+      { [REDIS_OPTION_COUNT]: 1 },
     );
 
     const parsedClaimed = RedisXAutoClaimResponseSchema.safeParse(claimed);
     if (!parsedClaimed.success) {
-      debugRedis('Invalid Redis claim response: %O', parsedClaimed.error);
+      this.logger.warn('Invalid Redis claim response', { error: parsedClaimed.error });
       return [];
     }
 
     const messagesArray = parsedClaimed.data.messages;
     if (!messagesArray || messagesArray.length === 0) {
-      debugRedis('No messages claimed');
+      this.logger.debug('No messages claimed');
       return [];
     }
 
     const messages = messagesArray.map(parseRedisMessage);
 
-    debugRedis(
-      'Claimed %d messages: %O',
-      messages.length,
-      messages.map((m) => m.id),
-    );
+    this.logger.debug('Claimed messages', {
+      count: messages.length,
+      messageIds: messages.map((m) => m.id),
+    });
     return messages;
   }
 
   async readMessages(options: RedisStreamReadOptions): Promise<readonly RedisMessage[]> {
-    debugRedis(
-      'Reading messages: streamKey=%s, groupName=%s, consumerName=%s, blockMs=%d',
-      options.streamKey,
-      options.groupName,
-      options.consumerName,
-      options.blockMs ?? 1000,
-    );
+    this.logger.debug('Reading messages', {
+      streamKey: options.streamKey,
+      groupName: options.groupName,
+      consumerName: options.consumerName,
+      blockMs: options.blockMs ?? 1000,
+    });
     const responses = await this.client.xReadGroup(
       options.groupName,
       options.consumerName,
-      [{key: options.streamKey, id: REDIS_STREAM_NEW_MESSAGES_ID}],
-      {[REDIS_OPTION_COUNT]: 1, [REDIS_OPTION_BLOCK]: options.blockMs ?? 1000},
+      [{ key: options.streamKey, id: REDIS_STREAM_NEW_MESSAGES_ID }],
+      { [REDIS_OPTION_COUNT]: 1, [REDIS_OPTION_BLOCK]: options.blockMs ?? 1000 },
     );
 
     if (!Array.isArray(responses) || responses.length === 0) {
-      debugRedis('No responses from Redis');
+      this.logger.debug('No responses from Redis');
       return [];
     }
 
     const response = responses[0];
     const parsedResponse = RedisXReadGroupResponseSchema.safeParse(response);
     if (!parsedResponse.success) {
-      debugRedis('Invalid Redis response structure: %O', parsedResponse.error);
+      this.logger.warn('Invalid Redis response structure', { error: parsedResponse.error });
       return [];
     }
 
     if (parsedResponse.data.messages.length === 0) {
-      debugRedis('No messages in response');
+      this.logger.debug('No messages in response');
       return [];
     }
 
     const messages = parsedResponse.data.messages.map(parseRedisMessage);
 
-    debugRedis(
-      'Read %d messages: %O',
-      messages.length,
-      messages.map((m) => m.id),
-    );
+    this.logger.debug('Read messages', {
+      count: messages.length,
+      messageIds: messages.map((m) => m.id),
+    });
     return messages;
   }
 
   async acknowledgeMessage(options: RedisStreamBaseOptions, messageId: string): Promise<void> {
-    debugRedis(
-      'Acknowledging message: streamKey=%s, groupName=%s, messageId=%s',
-      options.streamKey,
-      options.groupName,
+    this.logger.debug('Acknowledging message', {
+      streamKey: options.streamKey,
+      groupName: options.groupName,
       messageId,
-    );
+    });
     await this.client.xAck(options.streamKey, options.groupName, messageId);
-    debugRedis('Message acknowledged: messageId=%s', messageId);
+    this.logger.debug('Message acknowledged', { messageId });
   }
 
   async deleteMessage(streamKey: string, messageId: string): Promise<void> {
-    debugRedis('Deleting message: streamKey=%s, messageId=%s', streamKey, messageId);
+    this.logger.debug('Deleting message', { streamKey, messageId });
     await this.client.xDel(streamKey, messageId);
-    debugRedis('Message deleted: messageId=%s', messageId);
+    this.logger.debug('Message deleted', { messageId });
   }
 }
